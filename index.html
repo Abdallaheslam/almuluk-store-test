@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر الملوك | القهوة الفاخرة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary-dark: #2C1810;
+            --primary-gold: #D4AF37;
+            --secondary-gold: #B8860B;
+            --accent-brown: #5D4037;
+            --light-beige: #F5F1EA;
+            --dark-text: #1A120B;
+            --light-text: #FFFFFF;
+            --gray-text: #8D8D8D;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--light-beige);
+            color: var(--dark-text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(44, 24, 16, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 8px 0;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-gold);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            color: var(--primary-dark);
+            padding: 14px 32px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary-gold);
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 120px;
+            background: linear-gradient(rgba(44, 24, 16, 0.9), rgba(44, 24, 16, 0.8)), 
+                        url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') center/cover no-repeat;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            text-align: center;
+            margin: 0 auto;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 25px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--light-beige);
+            margin-bottom: 35px;
+            opacity: 0.95;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Products Section */
+        .section-title {
+            text-align: center;
+            font-size: 2.8rem;
+            color: var(--primary-dark);
+            margin: 80px 0 60px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-gold), var(--secondary-gold));
+            border-radius: 2px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 35px;
+            margin-bottom: 100px;
+        }
+
+        .product-card {
+            background: var(--light-text);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(93, 64, 55, 0.1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-gold);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 30px;
+        }
+
+        .product-name {
+            font-size: 1.6rem;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            color: var(--gray-text);
+            margin-bottom: 20px;
+            min-height: 72px;
+        }
+
+        .product-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary-gold);
+            margin-bottom: 25px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-order, .btn-details {
+            flex: 1;
+            padding: 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-order {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            color: var(--primary-dark);
+        }
+
+        .btn-details {
+            background: transparent;
+            color: var(--accent-brown);
+            border: 2px solid var(--accent-brown);
+        }
+
+        .btn-order:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-details:hover {
+            background: var(--accent-brown);
+            color: var(--light-text);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px;
+            margin-bottom: 100px;
+        }
+
+        .feature-card {
+            background: var(--light-text);
+            padding: 40px 30px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(93, 64, 55, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-gold);
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        .feature-title {
+            font-size: 1.7rem;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            background: linear-gradient(rgba(44, 24, 16, 0.95), rgba(44, 24, 16, 0.95)), 
+                        url('https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80') center/cover no-repeat;
+            padding: 100px 0;
+            margin-bottom: 100px;
+        }
+
+        .testimonials-section .section-title {
+            color: var(--primary-gold);
+        }
+
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 35px 30px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .rating {
+            color: var(--primary-gold);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 25px;
+            color: var(--primary-dark);
+            line-height: 1.8;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(93, 64, 55, 0.1);
+        }
+
+        .customer-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .customer-details {
+            flex: 1;
+        }
+
+        .customer-name {
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .review-date {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+        }
+
+        .add-review-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 18px 45px;
+            font-size: 1.2rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 100px 0;
+        }
+
+        .contact-methods {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 100px;
+        }
+
+        .contact-card {
+            background: var(--light-text);
+            padding: 40px 30px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            flex: 1;
+            min-width: 300px;
+            max-width: 350px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(93, 64, 55, 0.1);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-gold);
+        }
+
+        .contact-icon {
+            font-size: 3.2rem;
+            color: var(--primary-gold);
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        .contact-title {
+            font-size: 1.7rem;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+
+        .contact-link {
+            color: var(--accent-brown);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: block;
+            margin-top: 10px;
+        }
+
+        .contact-link:hover {
+            color: var(--primary-gold);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            color: var(--light-text);
+            padding: 70px 0 30px;
+            border-top: 3px solid var(--primary-gold);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+
+        .footer-logo {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-link {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-gold);
+            font-size: 1.3rem;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--primary-gold);
+            color: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+
+        .footer-column h3 {
+            font-size: 1.8rem;
+            color: var(--primary-gold);
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-gold);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 18px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-gold);
+            transform: translateX(5px);
+        }
+
+        .contact-info {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .contact-info p {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1rem;
+        }
+
+        .contact-info i {
+            color: var(--primary-gold);
+            font-size: 1.2rem;
+            min-width: 25px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .developer-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            color: var(--primary-gold);
+            font-weight: 600;
+        }
+
+        .developer-credit a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .developer-credit a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* WhatsApp Button */
+        .whatsapp-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background: #25D366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.3rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .whatsapp-button:hover {
+            transform: scale(1.1);
+            background: #128C7E;
+        }
+
+        /* Modal Windows */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(44, 24, 16, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--light-text);
+            border-radius: var(--border-radius-lg);
+            width: 90%;
+            max-width: 600px;
+            padding: 50px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(30px);
+            transition: transform 0.4s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-beige);
+        }
+
+        .modal-title {
+            font-size: 2.3rem;
+            color: var(--primary-dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--gray-text);
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-dark);
+            background: var(--light-beige);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(93, 64, 55, 0.2);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-family: 'Cairo', sans-serif;
+            transition: var(--transition);
+            background: var(--light-beige);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            background: var(--light-text);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Admin Panel */
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.97);
+            backdrop-filter: blur(15px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .admin-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .admin-panel {
+            background: var(--light-text);
+            border-radius: var(--border-radius-lg);
+            width: 95%;
+            max-width: 1300px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            background: var(--primary-dark);
+            color: var(--light-text);
+            padding: 40px 25px;
+        }
+
+        .admin-profile {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .admin-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 20px;
+            color: var(--primary-dark);
+        }
+
+        .admin-email {
+            color: var(--primary-gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .admin-menu {
+            list-style: none;
+        }
+
+        .admin-menu li {
+            margin-bottom: 12px;
+        }
+
+        .admin-menu a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .admin-menu a:hover,
+        .admin-menu a.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary-gold);
+        }
+
+        .admin-logout {
+            margin-top: 40px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            width: 100%;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .admin-logout:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #ff6b6b;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid var(--light-beige);
+        }
+
+        .admin-title {
+            font-size: 2.3rem;
+            color: var(--primary-dark);
+        }
+
+        .admin-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--gray-text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .admin-close:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Review Management */
+        .review-item {
+            background: var(--light-beige);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border: 1px solid rgba(93, 64, 55, 0.1);
+            transition: var(--transition);
+        }
+
+        .review-item:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary-gold);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .review-status {
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .review-status.approved {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+        }
+
+        .review-status.pending {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-approve,
+        .btn-delete {
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-approve {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+        }
+
+        .btn-delete {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .btn-approve:hover {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                width: 100%;
+                background: var(--primary-dark);
+                flex-direction: column;
+                gap: 0;
+                padding: 20px 0;
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links a {
+                padding: 15px 30px;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            }
+            
+            .nav-links a:last-child {
+                border-bottom: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .admin-panel {
+                flex-direction: column;
+                max-height: 95vh;
+            }
+            
+            .admin-sidebar {
+                width: 100%;
+                padding: 25px;
+            }
+            
+            .admin-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+                padding-bottom: 10px;
+            }
+            
+            .admin-menu li {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            
+            .admin-menu a {
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .contact-card {
+                min-width: 100%;
+            }
+            
+            .modal-content {
+                padding: 35px 25px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.9rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Messages */
+        .message {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            z-index: 4000;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.4s ease;
+            max-width: 400px;
+        }
+
+        .message.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .message.success {
+            background: #27ae60;
+            color: white;
+            border-right: 4px solid #1e8449;
+        }
+
+        .message.error {
+            background: #e74c3c;
+            color: white;
+            border-right: 4px solid #c0392b;
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .star-rating i {
+            font-size: 2.2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .star-rating i.active {
+            color: var(--primary-gold);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/201155996956?text=مرحباً%20أريد%20طلب%20قهوة%20من%20متجر%20الملوك" class="whatsapp-button" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Header -->
+    <header id="mainHeader">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-crown logo-icon"></i>
+                    متجر الملوك
+                </a>
+                
+                <ul class="nav-links">
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#products">المنتجات</a></li>
+                    <li><a href="#features">المميزات</a></li>
+                    <li><a href="#testimonials">التقييمات</a></li>
+                    <li><a href="#contact">التواصل</a></li>
+                </ul>
+                
+                <div class="nav-cta">
+                    <button class="cta-button" id="adminAccessBtn">
+                        <i class="fas fa-user-shield"></i> لوحة التحكم
+                    </button>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>متجر الملوك للقهوة الفاخرة</h1>
+                <p>جودة لا تضاهى، طعم لا يُنسى. من أجود حبوب البن العالمية، محمصة بعناية لتقدم تجربة قهوة استثنائية تليق بذوقك الرفيع.</p>
+                <div class="hero-buttons">
+                    <a href="#products" class="cta-button">
+                        <i class="fas fa-shopping-bag"></i> تسوق الآن
+                    </a>
+                    <a href="#contact" class="cta-button" style="background: transparent; border: 2px solid var(--primary-gold); color: var(--primary-gold);">
+                        <i class="fas fa-phone-alt"></i> تواصل معنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="container">
+        <h2 class="section-title">منتجاتنا المتميزة</h2>
+        <div class="products-grid" id="productsContainer">
+            <!-- سيتم تحميل المنتجات ديناميكياً -->
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="container">
+        <h2 class="section-title">لماذا تختار متجر الملوك؟</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <h3 class="feature-title">جودة عالمية</h3>
+                <p>نختار أجود أنواع حبوب البن من أفضل المزارع العالمية، مع ضمان الجودة في كل خطوة من خطوات الإنتاج.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-fire-alt"></i>
+                </div>
+                <h3 class="feature-title">تحميص يومي</h3>
+                <p>نحمص القهوة طازجة يومياً وفقاً لمعايير دقيقة لضمان أقصى درجات النكهة والطزاجة في كل فنجان.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3 class="feature-title">توصيل سريع</h3>
+                <p>نقدم خدمة توصيل سريعة لجميع أنحاء مصر خلال 24-48 ساعة، مع تغليف فاخر يحافظ على جودة المنتج.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3 class="feature-title">دعم فني متكامل</h3>
+                <p>فريق خدمة عملاء متخصص على مدار الساعة لمساعدتك في اختيار المنتج المناسب والإجابة على استفساراتك.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">آراء عملائنا</h2>
+            <div class="testimonials" id="testimonialsContainer">
+                <!-- سيتم تحميل التقييمات ديناميكياً -->
+            </div>
+            <button class="cta-button add-review-btn" id="addReviewBtn">
+                <i class="fas fa-plus-circle"></i> أضف تقييمك
+            </button>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <h2 class="section-title">تواصل معنا</h2>
+            <div class="contact-methods">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="contact-title">الواتساب</h3>
+                    <p>للطلبات السريعة والاستفسارات المباشرة</p>
+                    <a href="https://wa.me/201155996956" class="contact-link" target="_blank">
+                        +20 115 599 6956
+                    </a>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3 class="contact-title">الاتصال المباشر</h3>
+                    <p>خدمة العملاء على مدار الساعة</p>
+                    <a href="tel:+201155996956" class="contact-link">
+                        +20 115 599 6956
+                    </a>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fab fa-facebook"></i>
+                    </div>
+                    <h3 class="contact-title">فيسبوك</h3>
+                    <p>تابعنا على صفحتنا الرسمية</p>
+                    <a href="https://www.facebook.com/profile.php?id=61584685953852" class="contact-link" target="_blank">
+                        متجر الملوك الرسمي
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <i class="fas fa-crown"></i>
+                        متجر الملوك
+                    </div>
+                    <p class="footer-description">نقدم لكم أجود أنواع القهوة والبن من أفضل المزارع العالمية، محمصة بعناية فائقة لتليق بأذواقكم المتميزة. جودة واستمرارية منذ عام 2005.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/profile.php?id=61584685953852" class="social-link" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>روابط سريعة</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home"><i class="fas fa-chevron-left"></i> الرئيسية</a></li>
+                        <li><a href="#products"><i class="fas fa-chevron-left"></i> المنتجات</a></li>
+                        <li><a href="#features"><i class="fas fa-chevron-left"></i> المميزات</a></li>
+                        <li><a href="#testimonials"><i class="fas fa-chevron-left"></i> التقييمات</a></li>
+                        <li><a href="#contact"><i class="fas fa-chevron-left"></i> التواصل</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>معلومات التواصل</h3>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> مصر - جميع المحافظات</p>
+                        <p><i class="fas fa-phone"></i> +20 115 599 6956</p>
+                        <p><i class="fas fa-envelope"></i> info@mulukstore.com</p>
+                        <p><i class="fas fa-clock"></i> خدمة العملاء 24/7</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>جميع الحقوق محفوظة &copy; متجر الملوك</p>
+                <div class="developer-credit">
+                    <i class="fas fa-code"></i>
+                    <span>تم التطوير بواسطة <a href="https://ai7-dev.netlify.app/" target="_blank">AI7</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">إكمال الطلب</h2>
+                <button class="modal-close" id="closeOrderModal">&times;</button>
+            </div>
+            <form id="orderForm">
+                <input type="hidden" id="selectedProduct" name="product" value="">
+                <input type="hidden" id="selectedPrice" name="price" value="">
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerName">الاسم بالكامل</label>
+                    <input type="text" id="customerName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerPhone">رقم الهاتف</label>
+                    <input type="tel" id="customerPhone" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerAddress">العنوان (المحافظة والمنطقة)</label>
+                    <input type="text" id="customerAddress" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="quantity">الكمية</label>
+                    <select id="quantity" class="form-input" required>
+                        <option value="0.5">نصف كيلو</option>
+                        <option value="1" selected>1 كيلو</option>
+                        <option value="2">2 كيلو</option>
+                        <option value="3">3 كيلو</option>
+                        <option value="5">5 كيلو</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerNotes">ملاحظات إضافية (اختياري)</label>
+                    <textarea id="customerNotes" class="form-input" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="form-submit">
+                    <i class="fab fa-whatsapp"></i> إرسال الطلب عبر الواتساب
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">أضف تقييمك</h2>
+                <button class="modal-close" id="closeReviewModal">&times;</button>
+            </div>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label class="form-label" for="reviewerName">اسمك</label>
+                    <input type="text" id="reviewerName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="reviewerPhone">رقم الهاتف (اختياري)</label>
+                    <input type="tel" id="reviewerPhone" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">تقييمك</label>
+                    <div class="star-rating" id="starRating">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="ratingValue" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="reviewText">تعليقك (اختياري)</label>
+                    <textarea id="reviewText" class="form-input" rows="4" placeholder="شاركنا تجربتك مع قهوة الملوك..."></textarea>
+                </div>
+                
+                <button type="submit" class="form-submit">
+                    <i class="fas fa-paper-plane"></i> إرسال التقييم
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">تسجيل دخول المدير</h2>
+                <button class="modal-close" id="closeLoginModal">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="adminEmail">البريد الإلكتروني</label>
+                    <input type="email" id="adminEmail" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="adminPassword">كلمة المرور</label>
+                    <input type="password" id="adminPassword" class="form-input" required>
+                </div>
+                
+                <button type="submit" class="form-submit">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-overlay" id="adminPanel">
+        <div class="admin-panel">
+            <div class="admin-sidebar">
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>لوحة تحكم المدير</h3>
+                    <p class="admin-email" id="adminEmailDisplay">admin@mulukstore.com</p>
+                </div>
+                
+                <ul class="admin-menu">
+                    <li><a href="#adminDashboard" class="active"><i class="fas fa-tachometer-alt"></i> الإحصائيات</a></li>
+                    <li><a href="#adminProducts"><i class="fas fa-coffee"></i> المنتجات</a></li>
+                    <li><a href="#adminReviews"><i class="fas fa-star"></i> التقييمات</a></li>
+                    <li><a href="#adminOrders"><i class="fas fa-shopping-cart"></i> الطلبات</a></li>
+                    <li><a href="#adminSettings"><i class="fas fa-cog"></i> الإعدادات</a></li>
+                </ul>
+                
+                <button class="admin-logout" id="adminLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </div>
+            
+            <div class="admin-main">
+                <div class="admin-header">
+                    <h2 class="admin-title" id="adminSectionTitle">لوحة التحكم</h2>
+                    <button class="admin-close" id="closeAdminPanel">&times;</button>
+                </div>
+                
+                <div class="admin-content" id="adminContent">
+                    <!-- سيتم تحميل محتوى لوحة التحكم ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="message success" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span id="successText"></span>
+    </div>
+    
+    <div class="message error" id="errorMessage">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText"></span>
+    </div>
+
+    <script>
+        // ==================== تهيئة Firebase ====================
+        // قم بتغيير هذه الإعدادات بإعدادات مشروعك على Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1234567890abcdefghijklmnopqrstuvwxyz",
+            authDomain: "muluk-store.firebaseapp.com",
+            projectId: "muluk-store",
+            storageBucket: "muluk-store.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ==================== إدارة الحالة ====================
+        let currentUser = null;
+        let selectedRating = 0;
+        let products = [];
+        let reviews = [];
+
+        // ==================== تهيئة الصفحة ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل البيانات
+            loadProducts();
+            loadReviews();
+            checkAuthState();
+            
+            // إعداد الأحداث
+            setupEventListeners();
+            
+            // إضافة تأثيرات التمرير
+            initScrollEffects();
+        });
+
+        // ==================== تحميل البيانات ====================
+        async function loadProducts() {
+            try {
+                const snapshot = await db.collection('products')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                products = [];
+                snapshot.forEach(doc => {
+                    const product = doc.data();
+                    products.push({
+                        id: doc.id,
+                        ...product,
+                        createdAt: product.createdAt?.toDate() || new Date()
+                    });
+                });
+                
+                renderProducts();
+            } catch (error) {
+                console.error('خطأ في تحميل المنتجات:', error);
+                products = getSampleProducts();
+                renderProducts();
+            }
+        }
+
+        async function loadReviews() {
+            try {
+                const snapshot = await db.collection('reviews')
+                    .where('approved', '==', true)
+                    .orderBy('createdAt', 'desc')
+                    .limit(6)
+                    .get();
+                
+                reviews = [];
+                snapshot.forEach(doc => {
+                    const review = doc.data();
+                    reviews.push({
+                        id: doc.id,
+                        ...review,
+                        date: review.createdAt ? 
+                            new Date(review.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 
+                            'مؤخراً'
+                    });
+                });
+                
+                renderReviews();
+            } catch (error) {
+                console.error('خطأ في تحميل التقييمات:', error);
+                reviews = getSampleReviews();
+                renderReviews();
+            }
+        }
+
+        // ==================== عرض البيانات ====================
+        function renderProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            products.forEach((product, index) => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.style.animationDelay = `${index * 0.1}s`;
+                
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-price">${product.price} ج.م</div>
+                        <div class="product-actions">
+                            <button class="btn-order" data-id="${product.id}">
+                                <i class="fas fa-shopping-cart"></i> اطلب الآن
+                            </button>
+                            <button class="btn-details" data-id="${product.id}">
+                                <i class="fas fa-info-circle"></i> التفاصيل
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(productCard);
+            });
+            
+            // إضافة أحداث للأزرار
+            document.querySelectorAll('.btn-order').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.dataset.id;
+                    const product = products.find(p => p.id === productId);
+                    openOrderModal(product);
+                });
+            });
+        }
+
+        function renderReviews() {
+            const container = document.getElementById('testimonialsContainer');
+            container.innerHTML = '';
+            
+            reviews.forEach((review, index) => {
+                const testimonial = document.createElement('div');
+                testimonial.className = 'testimonial-card';
+                testimonial.style.animationDelay = `${index * 0.1}s`;
+                
+                // إنشاء النجوم
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    stars += i <= review.rating ? 
+                        '<i class="fas fa-star"></i>' : 
+                        '<i class="far fa-star"></i>';
+                }
+                
+                testimonial.innerHTML = `
+                    <div class="rating">${stars}</div>
+                    <p class="testimonial-text">"${review.text}"</p>
+                    <div class="customer-info">
+                        <div class="customer-avatar">
+                            ${review.name.charAt(0)}
+                        </div>
+                        <div class="customer-details">
+                            <div class="customer-name">${review.name}</div>
+                            <div class="review-date">${review.date}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(testimonial);
+            });
+        }
+
+        // ==================== إدارة النماذج ====================
+        function openOrderModal(product) {
+            document.getElementById('selectedProduct').value = product.name;
+            document.getElementById('selectedPrice').value = product.price;
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        // إغلاق جميع النماذج
+        document.querySelectorAll('.modal-close, .admin-close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal-overlay, .admin-overlay').classList.remove('active');
+            });
+        });
+
+        // إغلاق بالنقر خارج النموذج
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // ==================== نظام الطلبات ====================
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const orderData = {
+                product: document.getElementById('selectedProduct').value,
+                price: document.getElementById('selectedPrice').value,
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value,
+                quantity: document.getElementById('quantity').value,
+                notes: document.getElementById('customerNotes').value,
+                date: new Date().toLocaleString('ar-EG'),
+                status: 'جديد',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                // حفظ الطلب في Firebase
+                await db.collection('orders').add(orderData);
+                
+                // إنشاء رسالة الواتساب
+                const whatsappMessage = encodeURIComponent(
+                    `📦 طلب جديد من متجر الملوك\n\n` +
+                    `👤 الاسم: ${orderData.name}\n` +
+                    `📞 الهاتف: ${orderData.phone}\n` +
+                    `📍 العنوان: ${orderData.address}\n` +
+                    `☕ المنتج: ${orderData.product}\n` +
+                    `💰 السعر: ${orderData.price} ج.م\n` +
+                    `📦 الكمية: ${orderData.quantity} كيلو\n` +
+                    `📝 الملاحظات: ${orderData.notes || 'لا توجد'}\n` +
+                    `🕐 الوقت: ${orderData.date}`
+                );
+                
+                // إغلاق النموذج
+                document.getElementById('orderModal').classList.remove('active');
+                
+                // إظهار رسالة النجاح
+                showMessage('success', 'تم إرسال طلبك بنجاح! سيتم تحويلك للواتساب.');
+                
+                // التحويل للواتساب
+                setTimeout(() => {
+                    window.open(`https://wa.me/201155996956?text=${whatsappMessage}`, '_blank');
+                }, 1500);
+                
+                // إعادة تعيين النموذج
+                this.reset();
+                
+            } catch (error) {
+                console.error('خطأ في حفظ الطلب:', error);
+                showMessage('error', 'حدث خطأ في حفظ الطلب. حاول مرة أخرى.');
+            }
+        });
+
+        // ==================== نظام التقييمات ====================
+        document.getElementById('addReviewBtn').addEventListener('click', function() {
+            document.getElementById('reviewModal').classList.add('active');
+            selectedRating = 0;
+            updateStarRating();
+        });
+
+        // تقييم النجوم
+        document.querySelectorAll('#starRating i').forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                document.getElementById('ratingValue').value = selectedRating;
+                updateStarRating();
+            });
+        });
+
+        function updateStarRating() {
+            document.querySelectorAll('#starRating i').forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.className = 'fas fa-star active';
+                } else {
+                    star.className = 'far fa-star';
+                }
+            });
+        }
+
+        // إرسال التقييم
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (selectedRating === 0) {
+                showMessage('error', 'الرجاء اختيار تقييم');
+                return;
+            }
+            
+            const reviewData = {
+                name: document.getElementById('reviewerName').value,
+                phone: document.getElementById('reviewerPhone').value || '',
+                rating: selectedRating,
+                text: document.getElementById('reviewText').value || '',
+                approved: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                await db.collection('reviews').add(reviewData);
+                
+                showMessage('success', 'شكراً لتقييمك! سيتم عرضه بعد المراجعة.');
+                
+                document.getElementById('reviewModal').classList.remove('active');
+                this.reset();
+                selectedRating = 0;
+                updateStarRating();
+                
+            } catch (error) {
+                console.error('خطأ في حفظ التقييم:', error);
+                showMessage('error', 'حدث خطأ في حفظ التقييم.');
+            }
+        });
+
+        // ==================== إدارة المصادقة ====================
+        async function checkAuthState() {
+            auth.onAuthStateChanged((user) => {
+                currentUser = user;
+                if (user) {
+                    document.getElementById('adminEmailDisplay').textContent = user.email;
+                }
+            });
+        }
+
+        // فتح نافذة تسجيل الدخول
+        document.getElementById('adminAccessBtn').addEventListener('click', function() {
+            if (currentUser) {
+                openAdminPanel();
+            } else {
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+
+        // تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                
+                showMessage('success', 'تم تسجيل الدخول بنجاح!');
+                document.getElementById('loginModal').classList.remove('active');
+                openAdminPanel();
+                
+                this.reset();
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                showMessage('error', 'خطأ في تسجيل الدخول: ' + error.message);
+            }
+        });
+
+        // تسجيل الخروج
+        document.getElementById('adminLogoutBtn').addEventListener('click', async function() {
+            try {
+                await auth.signOut();
+                currentUser = null;
+                document.getElementById('adminPanel').classList.remove('active');
+                showMessage('success', 'تم تسجيل الخروج بنجاح');
+            } catch (error) {
+                console.error('خطأ في تسجيل الخروج:', error);
+                showMessage('error', 'خطأ في تسجيل الخروج');
+            }
+        });
+
+        // فتح لوحة التحكم
+        function openAdminPanel() {
+            if (!currentUser) return;
+            
+            document.getElementById('adminPanel').classList.add('active');
+            loadAdminDashboard();
+        }
+
+        // تحميل لوحة التحكم
+        function loadAdminDashboard() {
+            const content = document.getElementById('adminContent');
+            content.innerHTML = `
+                <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 1.8rem; color: var(--primary-dark); margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--light-beige);">إحصائيات عامة</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+                        <div style="background: var(--light-beige); padding: 25px; border-radius: var(--border-radius); border: 1px solid rgba(93, 64, 55, 0.1);">
+                            <h4 style="color: var(--primary-dark); margin-bottom: 10px;">عدد المنتجات</h4>
+                            <p style="font-size: 3rem; color: var(--secondary-gold); font-weight: 800;">${products.length}</p>
+                        </div>
+                        <div style="background: var(--light-beige); padding: 25px; border-radius: var(--border-radius); border: 1px solid rgba(93, 64, 55, 0.1);">
+                            <h4 style="color: var(--primary-dark); margin-bottom: 10px;">التقييمات المعلقة</h4>
+                            <p style="font-size: 3rem; color: var(--secondary-gold); font-weight: 800;">8</p>
+                        </div>
+                        <div style="background: var(--light-beige); padding: 25px; border-radius: var(--border-radius); border: 1px solid rgba(93, 64, 55, 0.1);">
+                            <h4 style="color: var(--primary-dark); margin-bottom: 10px;">الطلبات الجديدة</h4>
+                            <p style="font-size: 3rem; color: var(--secondary-gold); font-weight: 800;">5</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 1.8rem; color: var(--primary-dark); margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--light-beige);">إضافة منتج جديد</h3>
+                    <form id="adminProductForm" style="background: var(--light-beige); padding: 30px; border-radius: var(--border-radius); border: 1px solid rgba(93, 64, 55, 0.1);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                            <div>
+                                <label style="display: block; color: var(--primary-dark); font-weight: 600; margin-bottom: 10px;">اسم المنتج</label>
+                                <input type="text" id="newProductName" class="form-input" required>
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--primary-dark); font-weight: 600; margin-bottom: 10px;">السعر (ج.م)</label>
+                                <input type="number" id="newProductPrice" class="form-input" required>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; color: var(--primary-dark); font-weight: 600; margin-bottom: 10px;">رابط الصورة</label>
+                            <input type="url" id="newProductImage" class="form-input" required>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; color: var(--primary-dark); font-weight: 600; margin-bottom: 10px;">الوصف</label>
+                            <textarea id="newProductDesc" class="form-input" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="form-submit" style="margin-top: 0;">
+                            <i class="fas fa-plus"></i> إضافة المنتج
+                        </button>
+                    </form>
+                </div>
+            `;
+            
+            // إدارة النموذج
+            document.getElementById('adminProductForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const productData = {
+                    name: document.getElementById('newProductName').value,
+                    price: document.getElementById('newProductPrice').value,
+                    image: document.getElementById('newProductImage').value,
+                    description: document.getElementById('newProductDesc').value,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                try {
+                    await db.collection('products').add(productData);
+                    showMessage('success', 'تمت إضافة المنتج بنجاح!');
+                    this.reset();
+                    loadProducts();
+                } catch (error) {
+                    console.error('خطأ في إضافة المنتج:', error);
+                    showMessage('error', 'خطأ في إضافة المنتج');
+                }
+            });
+        }
+
+        // ==================== بيانات تجريبية ====================
+        function getSampleProducts() {
+            return [
+                {
+                    id: '1',
+                    name: 'بن البرازيل الذهبي',
+                    price: '185',
+                    image: 'https://images.unsplash.com/photo-1587734195507-6f5e8a2543d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
+                    description: 'بن برازيلي ذو جودة استثنائية، حبوب مختارة بعناية، نكهة غنية متوازنة مع حموضة منخفضة.',
+                    createdAt: new Date()
+                },
+                {
+                    id: '2',
+                    name: 'قهوة إثيوبيا العتيقة',
+                    price: '220',
+                    image: 'https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+                    description: 'قهوة ذات نكهة فواكهية مميزة، مع تلميحات من التوت والعسل، ناعمة المذاق.',
+                    createdAt: new Date()
+                },
+                {
+                    id: '3',
+                    name: 'مزيج الملوك الخاص',
+                    price: '275',
+                    image: 'https://images.unsplash.com/photo-1510707577719-ae7c9b788690?ixlib=rb-4.0.3&auto=format&fit=crop&w=686&q=80',
+                    description: 'مزيج حصري من أفضل حبوب البن العالمية، محمص بعناية لتقديم نكهة عميقة وفاخرة.',
+                    createdAt: new Date()
+                }
+            ];
+        }
+
+        function getSampleReviews() {
+            return [
+                {
+                    id: '1',
+                    name: 'أحمد السعيد',
+                    rating: 5,
+                    text: 'أفضل قهوة جربتها في حياتي! النكهة غنية والرائحة لا تقاوم. أنصح الجميع بتجربة مزيج الملوك الخاص.',
+                    date: '15 أكتوبر 2023'
+                },
+                {
+                    id: '2',
+                    name: 'سارة محمد',
+                    rating: 5,
+                    text: 'جودة لا تضاهى وتحميص ممتاز. أصبحت قهوة الملوك جزءاً من روتيني الصباحي. شكراً لكم!',
+                    date: '10 أكتوبر 2023'
+                },
+                {
+                    id: '3',
+                    name: 'خالد التركي',
+                    rating: 4,
+                    text: 'القهوة وصلت طازجة ورائحتها تدوم لأيام. خدمة عملاء ممتازة وتوصيل سريع. أنصح بهم بشدة.',
+                    date: '5 أكتوبر 2023'
+                }
+            ];
+        }
+
+        // ==================== وظائف مساعدة ====================
+        function showMessage(type, text) {
+            const message = document.getElementById(type + 'Message');
+            const messageText = document.getElementById(type + 'Text');
+            
+            messageText.textContent = text;
+            message.classList.add('active');
+            
+            setTimeout(() => {
+                message.classList.remove('active');
+            }, 3000);
+        }
+
+        function setupEventListeners() {
+            // القائمة المتحركة
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                document.querySelector('.nav-links').classList.toggle('active');
+            });
+
+            // إغلاق القائمة عند النقر على رابط
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    document.querySelector('.nav-links').classList.remove('active');
+                });
+            });
+
+            // تأثير التمرير للهيدر
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 100) {
+                    header.style.padding = '15px 0';
+                    header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    header.style.padding = '20px 0';
+                    header.style.boxShadow = 'none';
+                }
+            });
+        }
+
+        function initScrollEffects() {
+            // تأثيرات الظهور عند التمرير
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // مراقبة العناصر
+            document.querySelectorAll('.product-card, .feature-card, .testimonial-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        }
+    </script>
+</body>
+</html>
